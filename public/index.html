@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Roccan Soluções</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#0b0f1a;color:#fff}
+.w{max-width:760px;margin:auto;padding:20px}
+h1{font-size:2rem;line-height:1.15;margin:.4em 0}h2{margin-top:2em}
+.sub{color:#b8c0d4}.btn{display:inline-block;background:#2f6bff;color:#fff;border:0;border-radius:12px;padding:14px 20px;font-size:1rem;font-weight:700;text-decoration:none;cursor:pointer}
+.g{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.c{background:#141a2b;border:1px solid #232b45;border-radius:16px;padding:16px}
+.c b{display:block;margin-bottom:6px}
+.preco{font-size:1.6rem;font-weight:800;margin:8px 0}.preco small{font-size:.8rem;font-weight:400;color:#b8c0d4}
+input,select,textarea{width:100%;padding:13px;margin:6px 0;border-radius:10px;border:1px solid #232b45;background:#141a2b;color:#fff;font-size:1rem}
+.zap{position:fixed;right:16px;bottom:16px;background:#25d366;color:#04210f;border-radius:30px;padding:14px 18px;font-weight:800;text-decoration:none}
+#modal{display:none;position:fixed;inset:0;background:#000c;align-items:center;justify-content:center;padding:16px}
+#modal .c{max-width:420px;width:100%}
+</style></head><body><div class="w">
+<p class="sub">ROCCAN SOLUÇÕES</p>
+<h1>Pintura, reformas e manutenção predial sem dor de cabeça.</h1>
+<p class="sub">Orçamento rápido, contrato, pagamento e acompanhamento num só lugar. Para administradoras, síndicos, pintores e proprietários.</p>
+<a class="btn" href="#planos">Ver planos do app</a> <a class="btn" style="background:#232b45" href="#contato">Pedir orçamento</a>
+<p id="pago" class="sub"></p>
+
+<h2>Para quem é</h2>
+<div class="g">
+<div class="c"><b>Administradoras</b>Manutenção e pintura de condomínios com prazo, preço e controle.</div>
+<div class="c"><b>Síndicos</b>Orçamentos comparáveis e serviço acompanhado do início ao fim.</div>
+<div class="c"><b>Pintores</b>Mais clientes, orçamentos, contratos e recebimento no app.</div>
+<div class="c"><b>Proprietários</b>Reforma e pintura com profissional de confiança.</div>
+</div>
+
+<h2 id="planos">Planos do app Roccan</h2>
+<div class="g" id="lista"></div>
+
+<h2>Serviços e publicidade</h2>
+<div class="g">
+<div class="c"><b>Serviços Roccan</b>Pintura, reformas e manutenção predial. Peça seu orçamento abaixo.</div>
+<div class="c"><b>Publicidade em fachadas</b>Sua marca em fachadas e espaços urbanos.</div>
+</div>
+
+<h2 id="contato">Peça seu orçamento</h2>
+<form id="f">
+<input name="nome" placeholder="Seu nome" required>
+<input name="whats" placeholder="WhatsApp com DDD" inputmode="tel" required>
+<select name="perfil"><option>Administradora</option><option>Síndico</option><option>Pintor</option><option>Proprietário</option><option>Empresa / Publicidade</option></select>
+<textarea name="msg" rows="3" placeholder="Conte o que você precisa"></textarea>
+<button class="btn" style="width:100%">Enviar</button>
+<p id="ok" class="sub"></p>
+</form></div>
+
+<div id="modal"><div class="c">
+<b id="mt">Assinar</b>
+<form id="fa">
+<input name="nome" placeholder="Seu nome" required>
+<input name="whats" placeholder="WhatsApp com DDD" inputmode="tel" required>
+<button class="btn" style="width:100%">Continuar</button>
+<button type="button" class="btn" style="width:100%;background:#232b45;margin-top:8px" onclick="modal.style.display='none'">Cancelar</button>
+<p id="oka" class="sub"></p>
+</form></div></div>
+
+<a class="zap" id="zap" target="_blank">WhatsApp</a>
+<script>
+const $=id=>document.getElementById(id);let CFG={whats:'',planos:[]},plano=null;
+const brl=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+fetch('/api/config').then(r=>r.json()).then(c=>{CFG=c;
+ $('zap').href='https://wa.me/'+c.whats+'?text='+encodeURIComponent('Olá, vim pelo site da Roccan Soluções');
+ $('lista').innerHTML=c.planos.map(p=>`<div class="c"><b>${p.nome}</b><div class="sub">${p.desc}</div><div class="preco">${brl(p.preco)}<small>/mês</small></div><button class="btn" style="width:100%" onclick="abrir('${p.id}')">Assinar</button></div>`).join('');});
+function abrir(id){plano=id;const p=CFG.planos.find(x=>x.id===id);$('mt').textContent='Assinar plano '+p.nome+' · '+brl(p.preco)+'/mês';$('oka').textContent='';$('modal').style.display='flex';}
+$('fa').onsubmit=async e=>{e.preventDefault();
+ const d=Object.fromEntries(new FormData(e.target));d.plano=plano;
+ const r=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+ const j=await r.json();
+ if(j.modo==='pagar'){location.href=j.url;return;}
+ if(j.modo==='whatsapp'){location.href='https://wa.me/'+CFG.whats+'?text='+encodeURIComponent('Olá! Quero assinar o plano '+j.plano+' da Roccan. Meu nome: '+d.nome);return;}
+ $('oka').textContent='Erro. Confira os campos.';};
+$('f').onsubmit=async e=>{e.preventDefault();
+ const d=Object.fromEntries(new FormData(e.target));
+ const r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+ $('ok').textContent=r.ok?'Recebido! A Roccan vai te chamar no WhatsApp.':'Erro. Confira os campos.';
+ if(r.ok)e.target.reset();};
+const q=new URLSearchParams(location.search).get('pago');
+if(q==='1')$('pago').textContent='Pagamento aprovado! A Roccan vai entrar em contato para liberar seu acesso.';
+if(q==='2')$('pago').textContent='Pagamento pendente. Assim que confirmar, a Roccan libera seu acesso.';
+if(q==='0')$('pago').textContent='O pagamento não foi concluído. Tente de novo ou chame no WhatsApp.';
+</script></body></html>
