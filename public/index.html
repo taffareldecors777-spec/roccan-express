@@ -17,7 +17,7 @@ input,select,textarea{width:100%;padding:13px;margin:6px 0;border-radius:10px;bo
 <p class="sub">ROCCAN SOLUÇÕES</p>
 <h1>Pintura, reformas e manutenção predial sem dor de cabeça.</h1>
 <p class="sub">Orçamento rápido, contrato, pagamento e acompanhamento num só lugar. Para administradoras, síndicos, pintores e proprietários.</p>
-<a class="btn" href="#planos">Ver planos do app</a> <a class="btn" style="background:#232b45" href="#contato">Pedir orçamento</a>
+<a class="btn" href="#planos">Garantir acesso ao app</a> <a class="btn" style="background:#232b45" href="#contato">Pedir orçamento</a>
 <p id="pago" class="sub"></p>
 
 <h2>Para quem é</h2>
@@ -28,7 +28,8 @@ input,select,textarea{width:100%;padding:13px;margin:6px 0;border-radius:10px;bo
 <div class="c"><b>Proprietários</b>Reforma e pintura com profissional de confiança.</div>
 </div>
 
-<h2 id="planos">Planos do app Roccan</h2>
+<h2 id="planos">App Roccan: pré-venda</h2>
+<p class="sub">O app está em desenvolvimento. Garanta agora seu acesso antecipado pelo preço de lançamento: você entra na frente e é avisado no WhatsApp assim que o app for liberado.</p>
 <div class="g" id="lista"></div>
 
 <h2>Serviços e publicidade</h2>
@@ -48,7 +49,7 @@ input,select,textarea{width:100%;padding:13px;margin:6px 0;border-radius:10px;bo
 </form></div>
 
 <div id="modal"><div class="c">
-<b id="mt">Assinar</b>
+<b id="mt">Garantir acesso</b>
 <form id="fa">
 <input name="nome" placeholder="Seu nome" required>
 <input name="whats" placeholder="WhatsApp com DDD" inputmode="tel" required>
@@ -63,14 +64,14 @@ const $=id=>document.getElementById(id);let CFG={whats:'',planos:[]},plano=null;
 const brl=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 fetch('/api/config').then(r=>r.json()).then(c=>{CFG=c;
  $('zap').href='https://wa.me/'+c.whats+'?text='+encodeURIComponent('Olá, vim pelo site da Roccan Soluções');
- $('lista').innerHTML=c.planos.map(p=>`<div class="c"><b>${p.nome}</b><div class="sub">${p.desc}</div><div class="preco">${brl(p.preco)}<small>/mês</small></div><button class="btn" style="width:100%" onclick="abrir('${p.id}')">Assinar</button></div>`).join('');});
-function abrir(id){plano=id;const p=CFG.planos.find(x=>x.id===id);$('mt').textContent='Assinar plano '+p.nome+' · '+brl(p.preco)+'/mês';$('oka').textContent='';$('modal').style.display='flex';}
+ $('lista').innerHTML=c.planos.map(p=>`<div class="c"><b>${p.nome}</b><div class="sub">${p.desc}</div><div class="preco">${brl(p.preco)}<small>/mês</small></div><button class="btn" style="width:100%" onclick="abrir('${p.id}')">Garantir acesso</button></div>`).join('');});
+function abrir(id){plano=id;const p=CFG.planos.find(x=>x.id===id);$('mt').textContent='Garantir acesso: plano '+p.nome+' · '+brl(p.preco)+'/mês';$('oka').textContent='';$('modal').style.display='flex';}
 $('fa').onsubmit=async e=>{e.preventDefault();
  const d=Object.fromEntries(new FormData(e.target));d.plano=plano;
  const r=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
  const j=await r.json();
  if(j.modo==='pagar'){location.href=j.url;return;}
- if(j.modo==='whatsapp'){location.href='https://wa.me/'+CFG.whats+'?text='+encodeURIComponent('Olá! Quero assinar o plano '+j.plano+' da Roccan. Meu nome: '+d.nome);return;}
+ if(j.modo==='whatsapp'){location.href='https://wa.me/'+CFG.whats+'?text='+encodeURIComponent('Olá! Quero garantir meu acesso antecipado ao app Roccan (plano '+j.plano+'). Meu nome: '+d.nome);return;}
  $('oka').textContent='Erro. Confira os campos.';};
 $('f').onsubmit=async e=>{e.preventDefault();
  const d=Object.fromEntries(new FormData(e.target));
